@@ -1,7 +1,46 @@
 import type { Express } from "express";
 import { createServer } from "http";
-import { storage } from "./storage";
+import { storage as dbStorage } from "./storage";
 import { insertScreenshotSchema } from "@shared/schema";
+import multer from "multer";
+import path from "path";
+import { fileURLToPath } from "url";
+import fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Configure multer for file uploads
+const diskStorage = multer.diskStorage({
+  destination: function (_req, _file, cb) {
+    cb(null, uploadsDir)
+  },
+  filename: function (_req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, uniqueSuffix + path.extname(file.originalname))
+  }
+});
+
+const upload = multer({ 
+  storage: diskStorage,
+  fileFilter: (_req, file, cb) => {
+    const allowedTypes = ['image/png', 'image/jpeg', 'image/gif'];
+    if (allowedTypes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Invalid file type. Only PNG, JPEG and GIF are allowed.'));
+    }
+  },
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB limit
+  }
+});
 
 export async function registerRoutes(app: Express) {
   // Search screenshots
@@ -10,7 +49,7 @@ export async function registerRoutes(app: Express) {
     if (typeof q !== "string") {
       return res.status(400).json({ message: "Search query required" });
     }
-    const results = await storage.searchScreenshots(q);
+    const results = await dbStorage.searchScreenshots(q);
     res.json(results);
   });
 
@@ -26,34 +65,54 @@ export async function registerRoutes(app: Express) {
       filters.uiElements = uiElements.split(",");
     }
 
-    const results = await storage.filterScreenshots(filters);
+    const results = await dbStorage.filterScreenshots(filters);
     res.json(results);
   });
 
   // Get all screenshots
   app.get("/api/screenshots", async (_req, res) => {
-    const screenshots = await storage.getAllScreenshots();
+    const screenshots = await dbStorage.getAllScreenshots();
     res.json(screenshots);
   });
 
   // Get single screenshot
   app.get("/api/screenshots/:id", async (req, res) => {
     const id = parseInt(req.params.id);
-    const screenshot = await storage.getScreenshot(id);
+    const screenshot = await dbStorage.getScreenshot(id);
     if (!screenshot) {
       return res.status(404).json({ message: "Screenshot not found" });
     }
     res.json(screenshot);
   });
 
-  // Create screenshot
-  app.post("/api/screenshots", async (req, res) => {
-    const parseResult = insertScreenshotSchema.safeParse(req.body);
-    if (!parseResult.success) {
-      return res.status(400).json({ message: "Invalid screenshot data" });
+  // Create screenshot with file upload
+  app.post("/api/screenshots", upload.single('image'), async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No image file uploaded" });
+      }
+
+      const screenshotData = {
+        ...req.body,
+        imagePath: `/uploads/${req.file.filename}`,
+        uiElements: req.body.uiElements ? req.body.uiElements.split(',') : [],
+        tags: req.body.tags ? req.body.tags.split(',').map((t: string) => t.trim()) : [],
+      };
+
+      const parseResult = insertScreenshotSchema.safeParse(screenshotData);
+      if (!parseResult.success) {
+        return res.status(400).json({ message: "Invalid screenshot data" });
+      }
+
+      const screenshot = await dbStorage.createScreenshot(parseResult.data);
+      res.status(201).json(screenshot);
+    } catch (error) {
+      if (req.file) {
+        // Clean up uploaded file if something went wrong
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ message: "Failed to create screenshot" });
     }
-    const screenshot = await storage.createScreenshot(parseResult.data);
-    res.status(201).json(screenshot);
   });
 
   const httpServer = createServer(app);

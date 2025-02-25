@@ -28,19 +28,19 @@ import {
   SCREEN_TASKS,
   UI_ELEMENTS,
 } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
 
 export default function Upload() {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [isUploading, setIsUploading] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
   const form = useForm({
     resolver: zodResolver(insertScreenshotSchema),
     defaultValues: {
       title: "",
-      imageUrl: "",
+      imagePath: "",
       description: "",
       app: "",
       genre: GENRES[0],
@@ -50,10 +50,46 @@ export default function Upload() {
     },
   });
 
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Create a preview URL for the selected image
+      const url = URL.createObjectURL(file);
+      setPreviewUrl(url);
+    }
+  };
+
   async function onSubmit(data: any) {
     try {
       setIsUploading(true);
-      await apiRequest("POST", "/api/screenshots", data);
+
+      const formData = new FormData();
+      const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+      const imageFile = fileInput?.files?.[0];
+
+      if (!imageFile) {
+        throw new Error("Please select an image");
+      }
+
+      // Append all form data
+      formData.append("image", imageFile);
+      formData.append("title", data.title);
+      formData.append("description", data.description || "");
+      formData.append("app", data.app);
+      formData.append("genre", data.genre);
+      formData.append("screenTask", data.screenTask);
+      formData.append("uiElements", data.uiElements.join(","));
+      formData.append("tags", data.tags.join(","));
+
+      const response = await fetch("/api/screenshots", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to upload screenshot");
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["/api/screenshots"] });
       toast({
         title: "Success",
@@ -63,7 +99,7 @@ export default function Upload() {
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to upload screenshot",
+        description: error instanceof Error ? error.message : "Failed to upload screenshot",
         variant: "destructive",
       });
     } finally {
@@ -93,19 +129,26 @@ export default function Upload() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="imageUrl"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL</FormLabel>
-                    <FormControl>
-                      <Input {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
+              <FormItem>
+                <FormLabel>Screenshot Image</FormLabel>
+                <FormControl>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                  />
+                </FormControl>
+                {previewUrl && (
+                  <div className="mt-2">
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="max-w-full h-auto rounded-lg"
+                    />
+                  </div>
                 )}
-              />
+                <FormMessage />
+              </FormItem>
 
               <FormField
                 control={form.control}

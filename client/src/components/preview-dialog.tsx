@@ -28,7 +28,7 @@ export default function PreviewDialog({
 
         <div className="grid gap-6">
           <img
-            src={screenshot.imageUrl}
+            src={screenshot.imagePath}
             alt={screenshot.title}
             className="w-full rounded-lg"
           />

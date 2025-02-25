@@ -25,7 +25,7 @@ export class MemStorage implements IStorage {
     const sampleScreenshots: InsertScreenshot[] = [
       {
         title: "Minimalist Dashboard",
-        imageUrl: "https://images.unsplash.com/photo-1531403009284-440f080d1e12",
+        imagePath: "/uploads/sample-dashboard.jpg",
         description: "Clean dashboard interface with charts and stats",
         app: "Analytics Pro",
         genre: "Business",
@@ -35,7 +35,7 @@ export class MemStorage implements IStorage {
       },
       {
         title: "Social Feed",
-        imageUrl: "https://images.unsplash.com/photo-1586953208448-b95a79798f07",
+        imagePath: "/uploads/sample-feed.jpg",
         description: "Modern social media feed layout",
         app: "SocialConnect",
         genre: "Social",
@@ -43,7 +43,6 @@ export class MemStorage implements IStorage {
         uiElements: ["Card", "List"],
         tags: ["social", "feed", "modern"],
       },
-      // Add more sample screenshots here
     ];
 
     sampleScreenshots.forEach((screenshot) => {

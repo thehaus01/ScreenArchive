@@ -1,11 +1,11 @@
-import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const screenshots = pgTable("screenshots", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
-  imageUrl: text("image_url").notNull(),
+  imagePath: text("image_path").notNull(),
   description: text("description"),
   app: text("app").notNull(),
   genre: text("genre").notNull(),
@@ -17,7 +17,7 @@ export const screenshots = pgTable("screenshots", {
 
 export const insertScreenshotSchema = createInsertSchema(screenshots).omit({
   id: true,
-  uploadedAt: true,  
+  uploadedAt: true,
 });
 
 export type InsertScreenshot = z.infer<typeof insertScreenshotSchema>;

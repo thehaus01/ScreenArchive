@@ -12,7 +12,7 @@ export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
     <Card className="overflow-hidden cursor-pointer transition-all hover:shadow-lg">
       <div className="aspect-video relative">
         <img
-          src={screenshot.imageUrl}
+          src={screenshot.imagePath}
           alt={screenshot.title}
           className="w-full h-full object-cover"
         />
