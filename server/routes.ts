@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer } from "http";
 import { storage as dbStorage } from "./storage";
 import { insertScreenshotSchema } from "@shared/schema";
+import { generateImageTags } from "./services/openai";
 import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -85,7 +86,7 @@ export async function registerRoutes(app: Express) {
     res.json(screenshot);
   });
 
-  // Create screenshot with file upload
+  // Create screenshot with file upload and AI tagging
   app.post("/api/screenshots", upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
@@ -99,12 +100,20 @@ export async function registerRoutes(app: Express) {
         tags: req.body.tags ? req.body.tags.split(',').map((t: string) => t.trim()) : [],
       };
 
+      // Generate AI tags based on the screenshot data
+      const description = `This is a ${screenshotData.screenTask} screen from a ${screenshotData.genre} app called ${screenshotData.app}. ${screenshotData.description || ''} It contains UI elements like ${screenshotData.uiElements.join(', ')}.`;
+      const aiTags = await generateImageTags(description);
+
       const parseResult = insertScreenshotSchema.safeParse(screenshotData);
       if (!parseResult.success) {
         return res.status(400).json({ message: "Invalid screenshot data" });
       }
 
-      const screenshot = await dbStorage.createScreenshot(parseResult.data);
+      const screenshot = await dbStorage.createScreenshot({
+        ...parseResult.data,
+        aiTags,
+      });
+
       res.status(201).json(screenshot);
     } catch (error) {
       if (req.file) {

@@ -3,7 +3,7 @@ import { type Screenshot, type InsertScreenshot } from "@shared/schema";
 export interface IStorage {
   getAllScreenshots(): Promise<Screenshot[]>;
   getScreenshot(id: number): Promise<Screenshot | undefined>;
-  createScreenshot(screenshot: InsertScreenshot): Promise<Screenshot>;
+  createScreenshot(screenshot: InsertScreenshot & { aiTags: string[] }): Promise<Screenshot>;
   searchScreenshots(query: string): Promise<Screenshot[]>;
   filterScreenshots(filters: {
     app?: string;
@@ -22,7 +22,7 @@ export class MemStorage implements IStorage {
     this.currentId = 1;
 
     // Add sample screenshots
-    const sampleScreenshots: InsertScreenshot[] = [
+    const sampleScreenshots: (InsertScreenshot & { aiTags: string[] })[] = [
       {
         title: "Minimalist Dashboard",
         imagePath: "/placeholder-dashboard.svg",
@@ -32,6 +32,7 @@ export class MemStorage implements IStorage {
         screenTask: "Dashboard",
         uiElements: ["Chart", "Card", "Navigation"],
         tags: ["minimal", "dashboard", "analytics"],
+        aiTags: ["data-visualization", "metrics", "business-intelligence"],
       },
       {
         title: "Social Feed",
@@ -42,6 +43,7 @@ export class MemStorage implements IStorage {
         screenTask: "Navigation",
         uiElements: ["Card", "List"],
         tags: ["social", "feed", "modern"],
+        aiTags: ["social-media", "content-feed", "user-engagement"],
       },
     ];
 
@@ -58,7 +60,7 @@ export class MemStorage implements IStorage {
     return this.screenshots.get(id);
   }
 
-  async createScreenshot(screenshot: InsertScreenshot): Promise<Screenshot> {
+  async createScreenshot(screenshot: InsertScreenshot & { aiTags: string[] }): Promise<Screenshot> {
     const id = this.currentId++;
     const newScreenshot: Screenshot = {
       ...screenshot,
@@ -77,7 +79,8 @@ export class MemStorage implements IStorage {
         screenshot.title.toLowerCase().includes(lowercaseQuery) ||
         screenshot.description?.toLowerCase().includes(lowercaseQuery) ||
         screenshot.app.toLowerCase().includes(lowercaseQuery) ||
-        screenshot.tags.some((tag) => tag.toLowerCase().includes(lowercaseQuery))
+        screenshot.tags.some((tag) => tag.toLowerCase().includes(lowercaseQuery)) ||
+        screenshot.aiTags.some((tag) => tag.toLowerCase().includes(lowercaseQuery))
     );
   }
 

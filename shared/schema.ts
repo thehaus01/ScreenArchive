@@ -12,12 +12,14 @@ export const screenshots = pgTable("screenshots", {
   screenTask: text("screen_task").notNull(),
   uiElements: text("ui_elements").array().notNull(),
   tags: text("tags").array().notNull(),
+  aiTags: text("ai_tags").array().notNull(),
   uploadedAt: timestamp("uploaded_at").defaultNow().notNull(),
 });
 
 export const insertScreenshotSchema = createInsertSchema(screenshots).omit({
   id: true,
   uploadedAt: true,
+  aiTags: true, // AI tags will be generated server-side
 });
 
 export type InsertScreenshot = z.infer<typeof insertScreenshotSchema>;
