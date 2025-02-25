@@ -9,7 +9,13 @@ import Home from "@/pages/home";
 import Upload from "@/pages/upload";
 
 function Navigation() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  console.log("Current location:", location); // Debug log
+
+  const handleUploadClick = () => {
+    console.log("Upload button clicked"); // Debug log
+    setLocation("/upload");
+  };
 
   return (
     <header className="border-b">
@@ -17,7 +23,7 @@ function Navigation() {
         <Link href="/">
           <span className="text-xl font-bold cursor-pointer">UI Archive</span>
         </Link>
-        <Button onClick={() => setLocation("/upload")}>
+        <Button onClick={handleUploadClick}>
           <Plus className="h-4 w-4 mr-2" />
           Add Screenshot
         </Button>
