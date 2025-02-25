@@ -19,7 +19,7 @@ export interface IStorage {
   }): Promise<Screenshot[]>;
 
   // User management
-  createUser(user: InsertUser): Promise<User>;
+  createUser(user: InsertUser & { isAdmin?: string }): Promise<User>;
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
 
@@ -41,13 +41,6 @@ export class MemStorage implements IStorage {
     this.currentUserId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000, // prune expired entries every 24h
-    });
-
-    // Create initial admin user
-    this.createUser({
-      username: "admin",
-      password: "admin", // This will be hashed by the auth service
-      isAdmin: "true",
     });
 
     // Add sample screenshots
@@ -160,6 +153,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...userData,
       id,
+      isAdmin: userData.isAdmin || "false",
       createdAt: new Date(),
     };
     this.users.set(id, user);

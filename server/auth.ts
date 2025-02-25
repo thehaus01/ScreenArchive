@@ -1,11 +1,12 @@
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
-import { Express } from "express";
+import { Express, Request, Response, NextFunction } from "express";
 import session from "express-session";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { log } from "./vite";
 
 declare global {
   namespace Express {
@@ -16,19 +17,34 @@ declare global {
 const scryptAsync = promisify(scrypt);
 
 async function hashPassword(password: string) {
-  const salt = randomBytes(16).toString("hex");
-  const buf = (await scryptAsync(password, salt, 64)) as Buffer;
-  return `${buf.toString("hex")}.${salt}`;
+  try {
+    const salt = randomBytes(16).toString("hex");
+    const buf = (await scryptAsync(password, salt, 64)) as Buffer;
+    return `${buf.toString("hex")}.${salt}`;
+  } catch (error) {
+    log(`Error hashing password: ${error}`, "auth");
+    throw error;
+  }
 }
 
 async function comparePasswords(supplied: string, stored: string) {
-  const [hashed, salt] = stored.split(".");
-  const hashedBuf = Buffer.from(hashed, "hex");
-  const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
-  return timingSafeEqual(hashedBuf, suppliedBuf);
+  try {
+    const [hashed, salt] = stored.split(".");
+    if (!salt) {
+      throw new Error("Invalid stored password format");
+    }
+    const hashedBuf = Buffer.from(hashed, "hex");
+    const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
+    return timingSafeEqual(hashedBuf, suppliedBuf);
+  } catch (error) {
+    log(`Error comparing passwords: ${error}`, "auth");
+    throw error;
+  }
 }
 
-export function setupAuth(app: Express) {
+export async function setupAuth(app: Express) {
+  log("Setting up authentication...", "auth");
+
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || "change-me-in-production",
     resave: false,
@@ -44,6 +60,25 @@ export function setupAuth(app: Express) {
   app.use(session(sessionSettings));
   app.use(passport.initialize());
   app.use(passport.session());
+
+  // Create admin user if it doesn't exist
+  try {
+    log("Checking for admin user...", "auth");
+    const adminUser = await storage.getUserByUsername("admin");
+    if (!adminUser) {
+      log("Creating admin user...", "auth");
+      const hashedPassword = await hashPassword("admin");
+      await storage.createUser({
+        username: "admin",
+        password: hashedPassword,
+        isAdmin: "true", // Store as string
+      });
+      log("Admin user created successfully", "auth");
+    }
+  } catch (error) {
+    log(`Error setting up admin user: ${error}`, "auth");
+    throw error;
+  }
 
   passport.use(
     new LocalStrategy(async (username, password, done) => {
@@ -70,7 +105,7 @@ export function setupAuth(app: Express) {
   });
 
   // Auth middleware to check if user is admin
-  const requireAdmin = (req: Express.Request, res: Express.Response, next: Express.NextFunction) => {
+  const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
     if (!req.isAuthenticated() || !req.user.isAdmin) {
       return res.status(403).json({ message: "Unauthorized" });
     }

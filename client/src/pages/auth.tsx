@@ -14,6 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { insertUserSchema } from "@shared/schema";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { InfoIcon } from "lucide-react";
 
 export default function Auth() {
   const { user, loginMutation } = useAuth();
@@ -45,6 +47,18 @@ export default function Auth() {
         <Card>
           <CardContent className="pt-6">
             <h1 className="text-2xl font-bold mb-6">Sign In</h1>
+
+            <Alert className="mb-6">
+              <InfoIcon className="h-4 w-4" />
+              <AlertDescription>
+                Default login credentials:
+                <br />
+                Username: <strong>admin</strong>
+                <br />
+                Password: <strong>admin</strong>
+              </AlertDescription>
+            </Alert>
+
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}

@@ -46,7 +46,8 @@ const upload = multer({
 
 export async function registerRoutes(app: Express) {
   // Setup authentication and get the admin middleware
-  const { requireAdmin } = setupAuth(app);
+  const auth = await setupAuth(app);
+  const { requireAdmin } = auth;
 
   // Search screenshots
   app.get("/api/screenshots/search", async (req, res) => {
