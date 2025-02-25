@@ -61,12 +61,31 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
+  const ports = [5000, 5001, 5002, 5003];
+  
+  const tryListen = (portIndex = 0) => {
+    if (portIndex >= ports.length) {
+      throw new Error('No available ports found');
+    }
+    
+    const port = ports[portIndex];
+    server.listen({
+      port,
+      host: "0.0.0.0",
+      reusePort: true,
+    })
+    .on('error', (err: NodeJS.ErrnoException) => {
+      if (err.code === 'EADDRINUSE') {
+        log(`Port ${port} in use, trying next port...`);
+        tryListen(portIndex + 1);
+      } else {
+        throw err;
+      }
+    })
+    .on('listening', () => {
+      log(`serving on port ${port}`);
+    });
+  };
+
+  tryListen();
 })();
