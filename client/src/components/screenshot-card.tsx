@@ -2,17 +2,25 @@ import { useState } from "react";
 import { Screenshot } from "@shared/schema";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { placeholderDashboard, placeholderFeed } from "@/lib/placeholders";
 
 interface ScreenshotCardProps {
   screenshot: Screenshot;
 }
 
 export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
+  // Function to get the appropriate image source
+  const getImageSource = (path: string) => {
+    if (path === "/placeholder-dashboard.svg") return placeholderDashboard;
+    if (path === "/placeholder-feed.svg") return placeholderFeed;
+    return path;
+  };
+
   return (
     <Card className="overflow-hidden cursor-pointer transition-all hover:shadow-lg">
       <div className="aspect-video relative">
         <img
-          src={screenshot.imagePath}
+          src={getImageSource(screenshot.imagePath)}
           alt={screenshot.title}
           className="w-full h-full object-cover"
         />

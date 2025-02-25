@@ -25,7 +25,7 @@ export class MemStorage implements IStorage {
     const sampleScreenshots: InsertScreenshot[] = [
       {
         title: "Minimalist Dashboard",
-        imagePath: "/uploads/sample-dashboard.jpg",
+        imagePath: "/placeholder-dashboard.svg",
         description: "Clean dashboard interface with charts and stats",
         app: "Analytics Pro",
         genre: "Business",
@@ -35,7 +35,7 @@ export class MemStorage implements IStorage {
       },
       {
         title: "Social Feed",
-        imagePath: "/uploads/sample-feed.jpg",
+        imagePath: "/placeholder-feed.svg",
         description: "Modern social media feed layout",
         app: "SocialConnect",
         genre: "Social",
@@ -64,6 +64,7 @@ export class MemStorage implements IStorage {
       ...screenshot,
       id,
       uploadedAt: new Date(),
+      description: screenshot.description || null,
     };
     this.screenshots.set(id, newScreenshot);
     return newScreenshot;
