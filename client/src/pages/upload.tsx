@@ -62,6 +62,7 @@ export default function Upload() {
   async function onSubmit(data: any) {
     try {
       setIsUploading(true);
+      console.log("Starting upload process..."); // Debug log
 
       const formData = new FormData();
       const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
@@ -81,6 +82,7 @@ export default function Upload() {
       formData.append("uiElements", data.uiElements.join(","));
       formData.append("tags", data.tags.join(","));
 
+      console.log("Sending request to server..."); // Debug log
       const response = await fetch("/api/screenshots", {
         method: "POST",
         body: formData,
@@ -90,13 +92,21 @@ export default function Upload() {
         throw new Error("Failed to upload screenshot");
       }
 
-      await queryClient.invalidateQueries({ queryKey: ["/api/screenshots"] });
+      console.log("Upload successful, invalidating queries..."); // Debug log
+
+      // Invalidate both the filter and search queries
+      await queryClient.invalidateQueries({ queryKey: ["/api/screenshots/filter"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/screenshots/search"] });
+
       toast({
         title: "Success",
         description: "Screenshot uploaded successfully",
       });
+
+      console.log("Navigating to home page..."); // Debug log
       setLocation("/");
     } catch (error) {
+      console.error("Upload error:", error); // Debug log
       toast({
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to upload screenshot",

@@ -25,7 +25,7 @@ export default function Home() {
       if (searchQuery) {
         searchParams.append("q", searchQuery);
       } else {
-        Object.entries(params).forEach(([key, value]) => {
+        Object.entries(params as Record<string, any>).forEach(([key, value]) => {
           if (value) {
             if (Array.isArray(value)) {
               searchParams.append(key, value.join(","));
@@ -37,13 +37,16 @@ export default function Home() {
       }
 
       const url = `${endpoint}${searchParams.toString() ? `?${searchParams.toString()}` : ""}`;
+      console.log("Fetching screenshots from:", url); // Debug log
       const response = await fetch(url, {
         credentials: "include",
       });
       if (!response.ok) {
         throw new Error("Failed to fetch screenshots");
       }
-      return response.json();
+      const data = await response.json();
+      console.log("Fetched screenshots:", data); // Debug log
+      return data;
     },
   });
 
