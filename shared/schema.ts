@@ -2,6 +2,23 @@ import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").notNull(),
+  password: text("password").notNull(),
+  isAdmin: text("is_admin").notNull().default("false"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+  isAdmin: true,
+});
+
+export type InsertUser = z.infer<typeof insertUserSchema>;
+export type User = typeof users.$inferSelect;
+
 export const screenshots = pgTable("screenshots", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
@@ -19,7 +36,7 @@ export const screenshots = pgTable("screenshots", {
 export const insertScreenshotSchema = createInsertSchema(screenshots).omit({
   id: true,
   uploadedAt: true,
-  aiTags: true, // AI tags will be generated server-side
+  aiTags: true,
 });
 
 export type InsertScreenshot = z.infer<typeof insertScreenshotSchema>;

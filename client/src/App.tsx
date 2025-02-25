@@ -4,16 +4,35 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Upload from "@/pages/upload";
+import Auth from "@/pages/auth";
+
+function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user?.isAdmin) {
+    setLocation("/auth");
+    return null;
+  }
+
+  return <Component />;
+}
 
 function Navigation() {
+  const { user, logoutMutation } = useAuth();
   const [location, setLocation] = useLocation();
-  console.log("Current location:", location); // Debug log
+  console.log("Current location:", location);
 
   const handleUploadClick = () => {
-    console.log("Upload button clicked"); // Debug log
+    console.log("Upload button clicked");
     setLocation("/upload");
   };
 
@@ -23,10 +42,25 @@ function Navigation() {
         <Link href="/">
           <span className="text-xl font-bold cursor-pointer">UI Archive</span>
         </Link>
-        <Button onClick={handleUploadClick}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Screenshot
-        </Button>
+        <div className="flex items-center gap-4">
+          {user?.isAdmin ? (
+            <>
+              <Button onClick={handleUploadClick}>
+                <Plus className="h-4 w-4 mr-2" />
+                Add Screenshot
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => logoutMutation.mutate()}
+                disabled={logoutMutation.isPending}
+              >
+                {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+              </Button>
+            </>
+          ) : (
+            <Button onClick={() => setLocation("/auth")}>Sign In</Button>
+          )}
+        </div>
       </div>
     </header>
   );
@@ -38,7 +72,10 @@ function Router() {
       <Navigation />
       <Switch>
         <Route path="/" component={Home} />
-        <Route path="/upload" component={Upload} />
+        <Route path="/auth" component={Auth} />
+        <Route path="/upload" component={({ params }) => (
+          <ProtectedRoute component={Upload} />
+        )} />
         <Route component={NotFound} />
       </Switch>
     </div>
@@ -48,8 +85,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

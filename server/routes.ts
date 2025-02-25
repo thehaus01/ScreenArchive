@@ -7,6 +7,7 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
+import { setupAuth } from "./auth";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -44,6 +45,9 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express) {
+  // Setup authentication and get the admin middleware
+  const { requireAdmin } = setupAuth(app);
+
   // Search screenshots
   app.get("/api/screenshots/search", async (req, res) => {
     const { q } = req.query;
@@ -87,7 +91,7 @@ export async function registerRoutes(app: Express) {
   });
 
   // Create screenshot with file upload and AI tagging
-  app.post("/api/screenshots", upload.single('image'), async (req, res) => {
+  app.post("/api/screenshots", requireAdmin, upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No image file uploaded" });
@@ -121,6 +125,41 @@ export async function registerRoutes(app: Express) {
         fs.unlinkSync(req.file.path);
       }
       res.status(500).json({ message: "Failed to create screenshot" });
+    }
+  });
+
+  // Update screenshot (admin only)
+  app.patch("/api/screenshots/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const screenshot = await dbStorage.updateScreenshot(id, req.body);
+      res.json(screenshot);
+    } catch (error) {
+      res.status(404).json({ message: "Screenshot not found" });
+    }
+  });
+
+  // Delete screenshot (admin only)
+  app.delete("/api/screenshots/:id", requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const screenshot = await dbStorage.getScreenshot(id);
+      if (!screenshot) {
+        return res.status(404).json({ message: "Screenshot not found" });
+      }
+
+      // Delete the image file if it exists and is not a placeholder
+      if (screenshot.imagePath.startsWith("/uploads/")) {
+        const imagePath = path.join(__dirname, "..", screenshot.imagePath);
+        if (fs.existsSync(imagePath)) {
+          fs.unlinkSync(imagePath);
+        }
+      }
+
+      await dbStorage.deleteScreenshot(id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete screenshot" });
     }
   });
 
