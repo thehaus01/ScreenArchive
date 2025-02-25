@@ -1,4 +1,4 @@
-import { Switch, Route, Link } from "wouter";
+import { Switch, Route, Link, useLocation } from "wouter";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
@@ -9,18 +9,18 @@ import Home from "@/pages/home";
 import Upload from "@/pages/upload";
 
 function Navigation() {
+  const [, setLocation] = useLocation();
+
   return (
     <header className="border-b">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/">
           <span className="text-xl font-bold cursor-pointer">UI Archive</span>
         </Link>
-        <Link href="/upload">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Add Screenshot
-          </Button>
-        </Link>
+        <Button onClick={() => setLocation("/upload")}>
+          <Plus className="h-4 w-4 mr-2" />
+          Add Screenshot
+        </Button>
       </div>
     </header>
   );
