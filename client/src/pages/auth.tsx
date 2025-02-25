@@ -16,16 +16,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { insertUserSchema } from "@shared/schema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
+import { useEffect } from "react";
 
 export default function Auth() {
   const { user, loginMutation } = useAuth();
   const [, setLocation] = useLocation();
 
-  // Redirect if already logged in
-  if (user) {
-    setLocation("/");
-    return null;
-  }
+  useEffect(() => {
+    // Redirect if already logged in
+    if (user) {
+      setLocation("/");
+    }
+  }, [user, setLocation]);
 
   const form = useForm({
     resolver: zodResolver(
@@ -39,6 +41,11 @@ export default function Auth() {
 
   async function onSubmit(data: { username: string; password: string }) {
     await loginMutation.mutateAsync(data);
+  }
+
+  // Don't render anything while checking auth status
+  if (user) {
+    return null;
   }
 
   return (
