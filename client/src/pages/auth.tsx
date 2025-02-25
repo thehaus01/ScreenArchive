@@ -25,7 +25,8 @@ export default function Auth() {
   useEffect(() => {
     // Redirect if already logged in
     if (user) {
-      setLocation("/");
+      // Use setTimeout to avoid state update during render
+      setTimeout(() => setLocation("/"), 0);
     }
   }, [user, setLocation]);
 
