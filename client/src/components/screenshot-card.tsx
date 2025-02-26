@@ -55,6 +55,9 @@ export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
           <span className="mx-2">•</span>
           <span>{screenshot.genre}</span>
         </div>
+        <div className="text-sm text-muted-foreground mb-2">
+          <span>Task: {screenshot.screenTask}</span>
+        </div>
         <div className="flex flex-wrap gap-2">
           {screenshot.tags.map((tag) => (
             <Badge key={tag} variant="secondary" className="text-xs">
