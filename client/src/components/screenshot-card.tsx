@@ -7,6 +7,7 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { placeholderDashboard, placeholderFeed } from "@/lib/placeholders";
+import { useAuth } from "@/hooks/use-auth"; // Added import for useAuth
 
 interface ScreenshotCardProps {
   screenshot: Screenshot;
