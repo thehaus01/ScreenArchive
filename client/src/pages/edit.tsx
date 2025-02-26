@@ -88,18 +88,29 @@ export default function Edit() {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="image">Screenshot Image</Label>
-        <Input
-          id="image"
-          type="file"
-          accept="image/*"
-          onChange={(e) => {
-            if (e.target.files?.length) {
-              setFormData({ ...formData });
-            }
-          }}
-        />
+      <div className="space-y-4">
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Current Screenshot</h3>
+          <img 
+            src={screenshot.imagePath} 
+            alt={screenshot.title} 
+            className="w-full max-w-xl rounded-lg border"
+          />
+        </div>
+        
+        <div className="space-y-2">
+          <Label htmlFor="image">Replace Screenshot Image</Label>
+          <Input
+            id="image"
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              if (e.target.files?.length) {
+                setFormData({ ...formData });
+              }
+            }}
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
