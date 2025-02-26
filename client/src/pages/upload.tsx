@@ -266,17 +266,19 @@ export default function Upload() {
                 )}
               />
 
-              <div className="flex gap-4">
-                <Button type="submit" disabled={isUploading}>
-                  {isUploading ? "Saving..." : "Save"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setLocation("/")}
-                >
-                  Cancel
-                </Button>
+              <div className="flex justify-between items-center mt-6">
+                <div className="flex gap-4">
+                  <Button type="submit" disabled={isUploading}>
+                    {isUploading ? "Saving..." : "Save Screenshot"}
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setLocation("/")}
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </form>
           </Form>
