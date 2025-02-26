@@ -266,9 +266,18 @@ export default function Upload() {
                 )}
               />
 
-              <Button type="submit" disabled={isUploading}>
-                {isUploading ? "Uploading..." : "Upload Screenshot"}
-              </Button>
+              <div className="flex gap-4">
+                <Button type="submit" disabled={isUploading}>
+                  {isUploading ? "Uploading..." : "Upload Screenshot"}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setLocation("/")}
+                >
+                  Cancel
+                </Button>
+              </div>
             </form>
           </Form>
         </CardContent>
