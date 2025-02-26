@@ -267,6 +267,7 @@ export default function Upload() {
               />
 
               <div className="flex justify-between items-center mt-6">
+                <h1 className="text-2xl font-bold">Upload Screenshot</h1>
                 <div className="flex gap-4">
                   <Button type="submit" disabled={isUploading}>
                     {isUploading ? "Saving..." : "Save Screenshot"}
