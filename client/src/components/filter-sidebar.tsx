@@ -2,13 +2,13 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-import { GENRES, SCREEN_TASKS, UI_ELEMENTS } from "@shared/schema";
+import { SCREEN_TASKS, UI_ELEMENTS } from "@shared/schema";
 import { X } from "lucide-react";
+import { useState, useEffect } from 'react';
 
 interface FilterSidebarProps {
   filters: {
     app?: string;
-    genre?: string;
     screenTask?: string;
     uiElements?: string[];
   };
@@ -20,6 +20,24 @@ export default function FilterSidebar({
   onFiltersChange,
 }: FilterSidebarProps) {
   const clearFilters = () => onFiltersChange({});
+  const [appOptions, setAppOptions] = useState<string[]>([]);
+
+  useEffect(() => {
+    const fetchAppNames = async () => {
+      try {
+        const response = await fetch("/api/screenshots");
+        if (!response.ok) {
+          throw new Error("Failed to fetch screenshots");
+        }
+        const data = await response.json();
+        const uniqueApps = Array.from(new Set(data.map((s: any) => s.app))); // Assuming s.app exists
+        setAppOptions(uniqueApps);
+      } catch (error) {
+        console.error("Error fetching app names:", error);
+      }
+    };
+    fetchAppNames();
+  }, []);
 
   return (
     <div className="w-64 border-r bg-card p-6 hidden md:block">
@@ -40,21 +58,28 @@ export default function FilterSidebar({
       <ScrollArea className="h-[calc(100vh-8rem)]">
         <div className="space-y-6">
           <div>
-            <h3 className="mb-2 text-sm font-medium">Genre</h3>
+            <h3 className="mb-2 text-sm font-medium">App</h3>
             <div className="space-y-2">
-              {GENRES.map((genre) => (
+              <Button
+                variant={filters.app === "" ? "secondary" : "ghost"}
+                className="w-full justify-start"
+                onClick={() => onFiltersChange({ ...filters, app: "" })}
+              >
+                Any
+              </Button>
+              {appOptions.map((app) => (
                 <Button
-                  key={genre}
-                  variant={filters.genre === genre ? "secondary" : "ghost"}
+                  key={app}
+                  variant={filters.app === app ? "secondary" : "ghost"}
                   className="w-full justify-start"
                   onClick={() =>
                     onFiltersChange({
                       ...filters,
-                      genre: filters.genre === genre ? undefined : genre,
+                      app: filters.app === app ? undefined : app,
                     })
                   }
                 >
-                  {genre}
+                  {app}
                 </Button>
               ))}
             </div>
