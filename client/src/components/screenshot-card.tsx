@@ -21,21 +21,24 @@ export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
   };
 
   const [, setLocation] = useLocation();
+  const { user } = useAuth();
 
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg">
       <div className="relative">
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute top-2 right-2 z-10"
-          onClick={(e) => {
-            e.stopPropagation();
-            setLocation(`/edit/${screenshot.id}`);
-          }}
-        >
-          <Pencil className="h-4 w-4" />
-        </Button>
+        {user?.isAdmin && (
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute top-2 right-2 z-10"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLocation(`/edit/${screenshot.id}`);
+            }}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+        )}
       </div>
       <div className="aspect-video relative">
         <img
