@@ -20,39 +20,19 @@ export default function Edit() {
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [formData, setFormData] = useState<Partial<Screenshot>>({
-    title: "",
-    description: "",
-    app: "",
-    genre: "",
-    screenTask: "",
-    tags: [],
-    uiElements: []
-  });
+  const [formData, setFormData] = useState<Partial<Screenshot>>({});
 
-  const { data: screenshot, isLoading } = useQuery<Screenshot>({
+  const { data: screenshot } = useQuery<Screenshot>({
     queryKey: [`/api/screenshots/${id}`],
     queryFn: async () => {
       const response = await fetch(`/api/screenshots/${id}`);
-      if (!response.ok) {
-        throw new Error("Failed to fetch screenshot");
-      }
       return response.json();
     },
   });
 
   useEffect(() => {
     if (screenshot) {
-      console.log("Setting form data:", screenshot);
-      setFormData({
-        title: screenshot.title || "",
-        description: screenshot.description || "",
-        app: screenshot.app || "",
-        genre: screenshot.genre || "",
-        screenTask: screenshot.screenTask || "",
-        tags: screenshot.tags || [],
-        uiElements: screenshot.uiElements || []
-      });
+      setFormData(screenshot);
     }
   }, [screenshot]);
 
@@ -113,8 +93,7 @@ export default function Edit() {
     }
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (!screenshot) return <div className="flex justify-center items-center h-screen">Screenshot not found</div>;
+  if (!screenshot) return <div>Loading...</div>;
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 space-y-6">
@@ -174,7 +153,7 @@ export default function Edit() {
             accept="image/*"
             onChange={(e) => {
               if (e.target.files?.length) {
-                setFormData({ ...formData, image: e.target.files[0] }); //Added this line to update the formData with the new image.
+                setFormData({ ...formData });
               }
             }}
           />
@@ -231,20 +210,6 @@ export default function Edit() {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="uiElements">UI Elements (comma-separated)</Label>
-        <Input
-          id="uiElements"
-          value={(formData.uiElements || []).join(", ")}
-          onChange={(e) =>
-            setFormData({
-              ...formData,
-              uiElements: e.target.value.split(",").map((el) => el.trim()).filter(Boolean),
-            })
-          }
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label htmlFor="tags">Tags (comma-separated)</Label>
         <Input
           id="tags"
@@ -252,7 +217,7 @@ export default function Edit() {
           onChange={(e) =>
             setFormData({
               ...formData,
-              tags: e.target.value.split(",").map((t) => t.trim()).filter(Boolean),
+              tags: e.target.value.split(",").map((t) => t.trim()),
             })
           }
         />
