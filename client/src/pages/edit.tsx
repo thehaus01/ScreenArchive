@@ -13,11 +13,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Edit() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [formData, setFormData] = useState<Partial<Screenshot>>({});
 
   const { data: screenshot } = useQuery<Screenshot>({
@@ -63,6 +65,34 @@ export default function Edit() {
     setLocation("/");
   };
 
+  const handleDelete = async () => {
+    if (
+      !confirm(
+        "Are you sure you want to delete this screenshot? This action cannot be undone.",
+      )
+    ) {
+      return;
+    }
+
+    try {
+      await fetch(`/api/screenshots/${id}`, {
+        method: "DELETE",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/screenshots/filter"] });
+      setLocation("/");
+      toast({
+        title: "Success",
+        description: "Screenshot deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete screenshot",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (!screenshot) return <div>Loading...</div>;
 
   return (
@@ -71,6 +101,9 @@ export default function Edit() {
         <h1 className="text-2xl font-bold">Edit Screenshot</h1>
         <div className="flex gap-4">
           <Button type="submit">Update</Button>
+          <Button type="button" variant="destructive" onClick={handleDelete}>
+            Delete
+          </Button>
           <Button
             type="button"
             variant="outline"
@@ -78,6 +111,7 @@ export default function Edit() {
           >
             Cancel
           </Button>
+
         </div>
       </div>
 
