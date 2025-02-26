@@ -121,10 +121,24 @@ export default function Upload() {
     <div className="min-h-screen bg-background p-6">
       <Card className="max-w-2xl mx-auto">
         <CardContent className="pt-6">
-          <h1 className="text-2xl font-bold mb-6">Upload Screenshot</h1>
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-2xl font-bold">Upload Screenshot</h1>
+            <div className="flex gap-4">
+              <Button type="submit" form="uploadForm" disabled={isUploading}>
+                {isUploading ? "Saving..." : "Save Screenshot"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setLocation("/")}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
 
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form id="uploadForm" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <FormField
                 control={form.control}
                 name="title"
@@ -266,19 +280,7 @@ export default function Upload() {
                 )}
               />
 
-              <div className="flex gap-4">
-                <Button type="submit" disabled={isUploading}>
-                  {isUploading ? "Saving..." : "Save Screenshot"}
-                </Button>
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setLocation("/")}
-                >
-                  Cancel
-                </Button>
-              </div>
-            </form>
+              </form>
           </Form>
         </CardContent>
       </Card>
