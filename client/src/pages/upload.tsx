@@ -268,7 +268,7 @@ export default function Upload() {
 
               <div className="flex gap-4">
                 <Button type="submit" disabled={isUploading}>
-                  {isUploading ? "Uploading..." : "Upload Screenshot"}
+                  {isUploading ? "Saving..." : "Save"}
                 </Button>
                 <Button
                   type="button"

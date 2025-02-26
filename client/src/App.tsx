@@ -52,21 +52,13 @@ function Navigation() {
         </Link>
         <div className="flex items-center gap-4">
           {user?.isAdmin ? (
-            <>
-              <Link href="/upload">
-                <Button onClick={handleUploadClick}>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Screenshot
-                </Button>
-              </Link>
-              <Button
-                variant="outline"
-                onClick={() => logoutMutation.mutate()}
-                disabled={logoutMutation.isPending}
-              >
-                {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
-              </Button>
-            </>
+            <Button
+              variant="outline"
+              onClick={() => logoutMutation.mutate()}
+              disabled={logoutMutation.isPending}
+            >
+              {logoutMutation.isPending ? "Signing out..." : "Sign Out"}
+            </Button>
           ) : (
             <Button onClick={() => setLocation("/auth")}>Sign In</Button>
           )}
