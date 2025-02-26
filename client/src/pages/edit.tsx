@@ -153,7 +153,7 @@ export default function Edit() {
             accept="image/*"
             onChange={(e) => {
               if (e.target.files?.length) {
-                setFormData({ ...formData });
+                setFormData({ ...formData, image: e.target.files[0] }); //Added this line to update the formData with the new image.
               }
             }}
           />
