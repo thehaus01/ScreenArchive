@@ -6,8 +6,6 @@ import { Button } from "./ui/button";
 import { Pencil, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import placeholderDashboard from "../assets/placeholder-dashboard.svg";
-import placeholderFeed from "../assets/placeholder-feed.svg";
 import { placeholderDashboard, placeholderFeed } from "@/lib/placeholders";
 
 interface ScreenshotCardProps {
