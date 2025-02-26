@@ -9,6 +9,7 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Upload from "@/pages/upload";
 import Auth from "@/pages/auth";
+import Edit from "./pages/edit"; // Added import for Edit component
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { user, isLoading } = useAuth();
@@ -79,6 +80,7 @@ function Router() {
         <Route path="/upload" component={({ params }) => (
           <ProtectedRoute component={Upload} />
         )} />
+        <Route path="/edit/:id" component={Edit} /> {/* Added edit route */}
         <Route component={NotFound} />
       </Switch>
     </div>
