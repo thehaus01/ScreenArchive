@@ -11,7 +11,11 @@ import Upload from "@/pages/upload";
 import Auth from "@/pages/auth";
 import Edit from "./pages/edit"; // Added import for Edit component
 
-function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
+function ProtectedRoute({
+  component: Component,
+}: {
+  component: React.ComponentType;
+}) {
   const { user, isLoading } = useAuth();
   const [, setLocation] = useLocation();
 
@@ -42,7 +46,9 @@ function Navigation() {
     <header className="border-b">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/">
-          <span className="text-xl font-bold cursor-pointer">UI Archive</span>
+          <span className="text-xl font-bold cursor-pointer">
+            augment code Screenshot Archive
+          </span>
         </Link>
         <div className="flex items-center gap-4">
           {user?.isAdmin ? (
@@ -77,9 +83,10 @@ function Router() {
       <Switch>
         <Route path="/" component={Home} />
         <Route path="/auth" component={Auth} />
-        <Route path="/upload" component={({ params }) => (
-          <ProtectedRoute component={Upload} />
-        )} />
+        <Route
+          path="/upload"
+          component={({ params }) => <ProtectedRoute component={Upload} />}
+        />
         <Route path="/edit/:id" component={Edit} /> {/* Added edit route */}
         <Route component={NotFound} />
       </Switch>

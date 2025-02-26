@@ -43,14 +43,7 @@ export type InsertScreenshot = z.infer<typeof insertScreenshotSchema>;
 export type Screenshot = typeof screenshots.$inferSelect;
 
 // Predefined options for dropdowns
-export const GENRES = [
-  "Business",
-  "Social",
-  "E-commerce",
-  "Finance",
-  "Entertainment",
-  "Productivity",
-] as const;
+export const GENRES = ["IDE", "Agent"] as const;
 
 export const SCREEN_TASKS = [
   "Onboarding",
