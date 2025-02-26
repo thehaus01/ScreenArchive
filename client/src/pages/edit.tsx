@@ -68,7 +68,19 @@ export default function Edit() {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Edit Screenshot</h1>
+      <div className="flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Edit Screenshot</h1>
+        <div className="flex gap-4">
+          <Button type="submit">Update Screenshot</Button>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={() => setLocation("/")}
+          >
+            Cancel
+          </Button>
+        </div>
+      </div>
       
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
