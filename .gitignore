@@ -1,6 +1,25 @@
+# Dependencies
 node_modules
 dist
-.DS_Store
+
+# Build outputs
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Environment
+.env
+.env.local
+
+# IDE and OS files
+.DS_Store
+.vscode
+*.log
+
+# Upload directory (except .gitkeep)
+uploads/*
+!uploads/.gitkeep
+
+# Database
+*.sqlite
+*.db
