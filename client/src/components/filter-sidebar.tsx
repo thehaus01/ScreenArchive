@@ -150,28 +150,23 @@ export default function FilterSidebar({
             <div className="font-medium">Tags</div>
             <div className="space-y-2">
               {tagOptions.map((tag) => (
-                <div key={tag} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`tag-${tag}`}
-                    checked={(filters.tags || []).includes(tag)}
-                    onCheckedChange={(checked) => {
-                      const currentTags = filters.tags || [];
-                      const newTags = checked
-                        ? [...currentTags, tag]
-                        : currentTags.filter((t) => t !== tag);
-                      onFiltersChange({
-                        ...filters,
-                        tags: newTags.length ? newTags : undefined,
-                      });
-                    }}
-                  />
-                  <label
-                    htmlFor={`tag-${tag}`}
-                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    {tag}
-                  </label>
-                </div>
+                <Button
+                  key={tag}
+                  variant={(filters.tags || []).includes(tag) ? "secondary" : "ghost"}
+                  className="w-full justify-start"
+                  onClick={() => {
+                    const currentTags = filters.tags || [];
+                    const newTags = currentTags.includes(tag)
+                      ? currentTags.filter((t) => t !== tag)
+                      : [...currentTags, tag];
+                    onFiltersChange({
+                      ...filters,
+                      tags: newTags.length ? newTags : undefined,
+                    });
+                  }}
+                >
+                  {tag}
+                </Button>
               ))}
             </div>
           </div>

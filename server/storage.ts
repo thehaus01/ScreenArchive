@@ -16,6 +16,7 @@ export interface IStorage {
     genre?: string;
     screenTask?: string;
     uiElements?: string[];
+    tags?: string[];
   }): Promise<Screenshot[]>;
 
   // User management
@@ -133,19 +134,34 @@ export class MemStorage implements IStorage {
     genre?: string;
     screenTask?: string;
     uiElements?: string[];
+    tags?: string[];
   }): Promise<Screenshot[]> {
-    return Array.from(this.screenshots.values()).filter((screenshot) => {
-      if (filters.app && !screenshot.app.includes(filters.app)) return false;
-      if (filters.genre && screenshot.genre !== filters.genre) return false;
-      if (filters.screenTask && screenshot.screenTask !== filters.screenTask)
-        return false;
-      if (
-        filters.uiElements?.length &&
-        !filters.uiElements.every((el) => screenshot.uiElements.includes(el))
-      )
-        return false;
-      return true;
-    });
+    let screenshots = await this.getAllScreenshots();
+
+    if (filters.app) {
+      screenshots = screenshots.filter((s) => s.app === filters.app);
+    }
+
+    if (filters.genre) {
+      screenshots = screenshots.filter((s) => s.genre === filters.genre);
+    }
+
+    if (filters.screenTask) {
+      screenshots = screenshots.filter((s) => s.screenTask === filters.screenTask);
+    }
+
+    if (filters.uiElements && filters.uiElements.length > 0) {
+      screenshots = screenshots.filter((s) =>
+        filters.uiElements!.every((element) => s.uiElements.includes(element))
+      );
+    }
+
+    if (filters.tags && filters.tags.length > 0) {
+      screenshots = screenshots.filter((s) =>
+        filters.tags!.every((tag) => s.tags.includes(tag))
+      );
+    }
+    return screenshots;
   }
 
   async createUser(userData: InsertUser & { isAdmin?: string }): Promise<User> {
