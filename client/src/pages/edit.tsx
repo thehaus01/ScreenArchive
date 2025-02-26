@@ -1,4 +1,3 @@
-
 import { useParams, useLocation } from "wouter";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Screenshot, GENRES, SCREEN_TASKS, UI_ELEMENTS } from "@shared/schema";
@@ -38,12 +37,12 @@ export default function Edit() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = new FormData();
-    
+
     // Add all form fields
     Object.entries(formData).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
         if (Array.isArray(value)) {
-          form.append(key, value.join(','));
+          form.append(key, value.join(","));
         } else {
           form.append(key, value.toString());
         }
@@ -51,17 +50,17 @@ export default function Edit() {
     });
 
     // Add image if selected
-    const fileInput = document.querySelector<HTMLInputElement>('#image');
+    const fileInput = document.querySelector<HTMLInputElement>("#image");
     if (fileInput?.files?.length) {
-      form.append('image', fileInput.files[0]);
+      form.append("image", fileInput.files[0]);
     }
 
     await fetch(`/api/screenshots/${id}`, {
-      method: 'PATCH',
+      method: "PATCH",
       body: form,
     });
-    queryClient.invalidateQueries({ queryKey: ['/api/screenshots/filter'] });
-    setLocation('/');
+    queryClient.invalidateQueries({ queryKey: ["/api/screenshots/filter"] });
+    setLocation("/");
   };
 
   if (!screenshot) return <div>Loading...</div>;
@@ -71,22 +70,22 @@ export default function Edit() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Edit Screenshot</h1>
         <div className="flex gap-4">
-          <Button type="submit">Update Screenshot</Button>
-          <Button 
-            type="button" 
-            variant="outline" 
+          <Button type="submit">Update</Button>
+          <Button
+            type="button"
+            variant="outline"
             onClick={() => setLocation("/")}
           >
             Cancel
           </Button>
         </div>
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
         <Input
           id="title"
-          value={formData.title || ''}
+          value={formData.title || ""}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         />
       </div>
@@ -95,21 +94,23 @@ export default function Edit() {
         <Label htmlFor="description">Description</Label>
         <Textarea
           id="description"
-          value={formData.description || ''}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          value={formData.description || ""}
+          onChange={(e) =>
+            setFormData({ ...formData, description: e.target.value })
+          }
         />
       </div>
 
       <div className="space-y-4">
         <div>
           <h3 className="text-lg font-semibold mb-2">Current Screenshot</h3>
-          <img 
-            src={screenshot.imagePath} 
-            alt={screenshot.title} 
+          <img
+            src={screenshot.imagePath}
+            alt={screenshot.title}
             className="w-full max-w-xl rounded-lg border"
           />
         </div>
-        
+
         <div className="space-y-2">
           <Label htmlFor="image">Replace Screenshot Image</Label>
           <Input
@@ -129,7 +130,7 @@ export default function Edit() {
         <Label htmlFor="app">App Name</Label>
         <Input
           id="app"
-          value={formData.app || ''}
+          value={formData.app || ""}
           onChange={(e) => setFormData({ ...formData, app: e.target.value })}
         />
       </div>
@@ -157,7 +158,9 @@ export default function Edit() {
         <Label htmlFor="screenTask">Screen Task</Label>
         <Select
           value={formData.screenTask}
-          onValueChange={(value) => setFormData({ ...formData, screenTask: value })}
+          onValueChange={(value) =>
+            setFormData({ ...formData, screenTask: value })
+          }
         >
           <SelectTrigger>
             <SelectValue placeholder="Select screen task" />
@@ -176,14 +179,23 @@ export default function Edit() {
         <Label htmlFor="tags">Tags (comma-separated)</Label>
         <Input
           id="tags"
-          value={(formData.tags || []).join(', ')}
-          onChange={(e) => setFormData({ ...formData, tags: e.target.value.split(',').map(t => t.trim()) })}
+          value={(formData.tags || []).join(", ")}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              tags: e.target.value.split(",").map((t) => t.trim()),
+            })
+          }
         />
       </div>
 
       <div className="flex gap-4">
         <Button type="submit">Save Changes</Button>
-        <Button type="button" variant="outline" onClick={() => setLocation('/')}>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setLocation("/")}
+        >
           Cancel
         </Button>
       </div>

@@ -65,7 +65,8 @@ export default function Upload() {
       console.log("Starting upload process..."); // Debug log
 
       const formData = new FormData();
-      const fileInput = document.querySelector<HTMLInputElement>('input[type="file"]');
+      const fileInput =
+        document.querySelector<HTMLInputElement>('input[type="file"]');
       const imageFile = fileInput?.files?.[0];
 
       if (!imageFile) {
@@ -95,8 +96,12 @@ export default function Upload() {
       console.log("Upload successful, invalidating queries..."); // Debug log
 
       // Invalidate both the filter and search queries
-      await queryClient.invalidateQueries({ queryKey: ["/api/screenshots/filter"] });
-      await queryClient.invalidateQueries({ queryKey: ["/api/screenshots/search"] });
+      await queryClient.invalidateQueries({
+        queryKey: ["/api/screenshots/filter"],
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["/api/screenshots/search"],
+      });
 
       toast({
         title: "Success",
@@ -109,7 +114,10 @@ export default function Upload() {
       console.error("Upload error:", error); // Debug log
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to upload screenshot",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to upload screenshot",
         variant: "destructive",
       });
     } finally {
@@ -125,7 +133,7 @@ export default function Upload() {
             <h1 className="text-2xl font-bold">Upload Screenshot</h1>
             <div className="flex gap-4">
               <Button type="submit" form="uploadForm" disabled={isUploading}>
-                {isUploading ? "Saving..." : "Save Screenshot"}
+                {isUploading ? "Saving..." : "Save"}
               </Button>
               <Button
                 type="button"
@@ -138,7 +146,11 @@ export default function Upload() {
           </div>
 
           <Form {...form}>
-            <form id="uploadForm" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              id="uploadForm"
+              onSubmit={form.handleSubmit(onSubmit)}
+              className="space-y-6"
+            >
               <FormField
                 control={form.control}
                 name="title"
@@ -270,7 +282,7 @@ export default function Upload() {
                         value={field.value.join(", ")}
                         onChange={(e) =>
                           field.onChange(
-                            e.target.value.split(",").map((tag) => tag.trim())
+                            e.target.value.split(",").map((tag) => tag.trim()),
                           )
                         }
                       />
@@ -279,8 +291,7 @@ export default function Upload() {
                   </FormItem>
                 )}
               />
-
-              </form>
+            </form>
           </Form>
         </CardContent>
       </Card>
