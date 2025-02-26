@@ -111,7 +111,6 @@ export default function Edit() {
           >
             Cancel
           </Button>
-
         </div>
       </div>
 
@@ -224,7 +223,10 @@ export default function Edit() {
       </div>
 
       <div className="flex gap-4">
-        <Button type="submit">Save Changes</Button>
+        <Button type="submit">Update</Button>
+        <Button type="button" variant="destructive" onClick={handleDelete}>
+          Delete
+        </Button>
         <Button
           type="button"
           variant="outline"
