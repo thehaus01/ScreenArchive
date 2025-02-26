@@ -37,12 +37,28 @@ export default function Edit() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const form = new FormData();
+    
+    // Add all form fields
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        if (Array.isArray(value)) {
+          form.append(key, value.join(','));
+        } else {
+          form.append(key, value.toString());
+        }
+      }
+    });
+
+    // Add image if selected
+    const fileInput = document.querySelector<HTMLInputElement>('#image');
+    if (fileInput?.files?.length) {
+      form.append('image', fileInput.files[0]);
+    }
+
     await fetch(`/api/screenshots/${id}`, {
       method: 'PATCH',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(formData),
+      body: form,
     });
     queryClient.invalidateQueries({ queryKey: ['/api/screenshots/filter'] });
     setLocation('/');
@@ -69,6 +85,20 @@ export default function Edit() {
           id="description"
           value={formData.description || ''}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="image">Screenshot Image</Label>
+        <Input
+          id="image"
+          type="file"
+          accept="image/*"
+          onChange={(e) => {
+            if (e.target.files?.length) {
+              setFormData({ ...formData });
+            }
+          }}
         />
       </div>
 

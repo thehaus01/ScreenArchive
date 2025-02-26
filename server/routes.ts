@@ -130,13 +130,37 @@ export async function registerRoutes(app: Express) {
   });
 
   // Update screenshot (admin only)
-  app.patch("/api/screenshots/:id", requireAdmin, async (req, res) => {
+  app.patch("/api/screenshots/:id", requireAdmin, upload.single('image'), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
-      const screenshot = await dbStorage.updateScreenshot(id, req.body);
-      res.json(screenshot);
+      const screenshot = await dbStorage.getScreenshot(id);
+      
+      if (!screenshot) {
+        return res.status(404).json({ message: "Screenshot not found" });
+      }
+
+      // If new image uploaded, delete old one if it's not a placeholder
+      if (req.file && screenshot.imagePath.startsWith("/uploads/")) {
+        const oldImagePath = path.join(__dirname, "..", screenshot.imagePath);
+        if (fs.existsSync(oldImagePath)) {
+          fs.unlinkSync(oldImagePath);
+        }
+      }
+
+      const updateData = {
+        ...req.body,
+        imagePath: req.file ? `/uploads/${req.file.filename}` : screenshot.imagePath,
+        uiElements: req.body.uiElements ? req.body.uiElements.split(',') : screenshot.uiElements,
+        tags: req.body.tags ? req.body.tags.split(',') : screenshot.tags,
+      };
+
+      const updatedScreenshot = await dbStorage.updateScreenshot(id, updateData);
+      res.json(updatedScreenshot);
     } catch (error) {
-      res.status(404).json({ message: "Screenshot not found" });
+      if (req.file) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.status(500).json({ message: "Failed to update screenshot" });
     }
   });
 
