@@ -31,7 +31,8 @@ function Navigation() {
   const [location, setLocation] = useLocation();
   console.log("Current location:", location);
 
-  const handleUploadClick = () => {
+  const handleUploadClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     console.log("Upload button clicked");
     setLocation("/upload");
   };
@@ -45,10 +46,12 @@ function Navigation() {
         <div className="flex items-center gap-4">
           {user?.isAdmin ? (
             <>
-              <Button onClick={handleUploadClick}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Screenshot
-              </Button>
+              <Link href="/upload">
+                <Button onClick={handleUploadClick}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Screenshot
+                </Button>
+              </Link>
               <Button
                 variant="outline"
                 onClick={() => logoutMutation.mutate()}
