@@ -5,12 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { SCREEN_TASKS, UI_ELEMENTS } from "@shared/schema";
 import { X } from "lucide-react";
 import { useState, useEffect } from 'react';
+import { Checkbox } from "@/components/ui/checkbox";
+
 
 interface FilterSidebarProps {
   filters: {
     app?: string;
     screenTask?: string;
     uiElements?: string[];
+    tags?: string[];
   };
   onFiltersChange: (filters: FilterSidebarProps["filters"]) => void;
 }
@@ -21,22 +24,25 @@ export default function FilterSidebar({
 }: FilterSidebarProps) {
   const clearFilters = () => onFiltersChange({});
   const [appOptions, setAppOptions] = useState<string[]>([]);
+  const [tagOptions, setTagOptions] = useState<string[]>([]);
 
   useEffect(() => {
-    const fetchAppNames = async () => {
+    const fetchData = async () => {
       try {
         const response = await fetch("/api/screenshots");
         if (!response.ok) {
           throw new Error("Failed to fetch screenshots");
         }
         const data = await response.json();
-        const uniqueApps = Array.from(new Set(data.map((s: any) => s.app))); // Assuming s.app exists
+        const uniqueApps = Array.from(new Set(data.map((s: any) => s.app)));
+        const uniqueTags = Array.from(new Set(data.flatMap((s: any) => s.tags || []))); // Assuming s.tags is an array
         setAppOptions(uniqueApps);
+        setTagOptions(uniqueTags);
       } catch (error) {
-        console.error("Error fetching app names:", error);
+        console.error("Error fetching data:", error);
       }
     };
-    fetchAppNames();
+    fetchData();
   }, []);
 
   return (
@@ -136,6 +142,37 @@ export default function FilterSidebar({
                   </Badge>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Tags Filter */}
+          <div className="space-y-4">
+            <div className="font-medium">Tags</div>
+            <div className="space-y-2">
+              {tagOptions.map((tag) => (
+                <div key={tag} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`tag-${tag}`}
+                    checked={(filters.tags || []).includes(tag)}
+                    onCheckedChange={(checked) => {
+                      const currentTags = filters.tags || [];
+                      const newTags = checked
+                        ? [...currentTags, tag]
+                        : currentTags.filter((t) => t !== tag);
+                      onFiltersChange({
+                        ...filters,
+                        tags: newTags.length ? newTags : undefined,
+                      });
+                    }}
+                  />
+                  <label
+                    htmlFor={`tag-${tag}`}
+                    className="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    {tag}
+                  </label>
+                </div>
+              ))}
             </div>
           </div>
         </div>

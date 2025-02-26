@@ -14,6 +14,7 @@ export default function Home() {
     genre?: string;
     screenTask?: string;
     uiElements?: string[];
+    tags?: string[];
   }>({});
 
   const { data: screenshots = [], isLoading } = useQuery<Screenshot[]>({

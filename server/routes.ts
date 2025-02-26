@@ -61,7 +61,7 @@ export async function registerRoutes(app: Express) {
 
   // Filter screenshots
   app.get("/api/screenshots/filter", async (req, res) => {
-    const { app, genre, screenTask, uiElements } = req.query;
+    const { app, genre, screenTask, uiElements, tags } = req.query;
     const filters: any = {};
 
     if (typeof app === "string") filters.app = app;
@@ -69,6 +69,9 @@ export async function registerRoutes(app: Express) {
     if (typeof screenTask === "string") filters.screenTask = screenTask;
     if (typeof uiElements === "string") {
       filters.uiElements = uiElements.split(",");
+    }
+    if (typeof tags === "string") {
+      filters.tags = tags.split(",");
     }
 
     const results = await dbStorage.filterScreenshots(filters);
