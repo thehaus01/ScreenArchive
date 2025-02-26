@@ -9,7 +9,8 @@ import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Upload from "@/pages/upload";
 import Auth from "@/pages/auth";
-import Edit from "./pages/edit"; // Added import for Edit component
+import Edit from "./pages/edit";
+import BulkUpload from "./pages/bulk-upload"; // Added import for BulkUpload component
 
 function ProtectedRoute({
   component: Component,
@@ -54,12 +55,20 @@ function Navigation() {
           {user?.isAdmin ? (
             <>
               {location === "/" && (
-                <Link href="/upload">
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Screenshot
-                  </Button>
-                </Link>
+                <>
+                  <Link href="/upload">
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Screenshot
+                    </Button>
+                  </Link>
+                  <Link href="/bulk-upload"> {/* Added link for bulk upload */}
+                    <Button>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Multiple
+                    </Button>
+                  </Link>
+                </>
               )}
               <Button
                 variant="outline"
@@ -89,7 +98,11 @@ function Router() {
           path="/upload"
           component={({ params }) => <ProtectedRoute component={Upload} />}
         />
-        <Route path="/edit/:id" component={Edit} /> {/* Added edit route */}
+        <Route
+          path="/bulk-upload"
+          component={({ params }) => <ProtectedRoute component={BulkUpload} />}
+        /> {/* Added bulk upload route */}
+        <Route path="/edit/:id" component={Edit} />
         <Route component={NotFound} />
       </Switch>
     </div>
