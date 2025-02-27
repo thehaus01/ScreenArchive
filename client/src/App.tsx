@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { AuthProvider, useAuth } from "@/hooks/use-auth";
+import { useEffect, useRef } from "react";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
 import Upload from "@/pages/upload";
@@ -36,6 +37,18 @@ function Navigation() {
   const { user, logoutMutation } = useAuth();
   const [location, setLocation] = useLocation();
   console.log("Current location:", location);
+  
+  // Save a reference to prevent repeated redirects
+  const redirectAttempted = useRef(false);
+  
+  useEffect(() => {
+    // Only attempt to redirect once per component mount
+    if (!user && location !== "/auth" && !redirectAttempted.current) {
+      redirectAttempted.current = true;
+      console.log("Redirecting to /auth");
+      setLocation("/auth");
+    }
+  }, [user, location, setLocation]);
 
   const handleUploadClick = (e: React.MouseEvent) => {
     e.preventDefault();
