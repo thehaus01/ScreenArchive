@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -31,34 +30,34 @@ export default function BulkUpload() {
     uiElements: [UI_ELEMENTS[0]],
     tags: [],
   });
-  
+
   const handleFilesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files?.length) return;
-    
+
     // Convert FileList to array and add to existing files
     const newFiles = Array.from(e.target.files);
     setFiles([...files, ...newFiles]);
-    
+
     // Create preview URLs for the new files
     const newPreviewUrls = newFiles.map(file => URL.createObjectURL(file));
     setPreviewUrls([...previewUrls, ...newPreviewUrls]);
   };
-  
+
   const removeFile = (index: number) => {
     // Remove file from files array
     const newFiles = [...files];
     newFiles.splice(index, 1);
     setFiles(newFiles);
-    
+
     // Revoke object URL to avoid memory leaks
     URL.revokeObjectURL(previewUrls[index]);
-    
+
     // Remove preview URL from previewUrls array
     const newPreviewUrls = [...previewUrls];
     newPreviewUrls.splice(index, 1);
     setPreviewUrls(newPreviewUrls);
   };
-  
+
   const handleUpload = async () => {
     if (files.length === 0) {
       toast({
@@ -68,46 +67,46 @@ export default function BulkUpload() {
       });
       return;
     }
-    
+
     setIsUploading(true);
-    
+
     try {
       // Upload each file with the same metadata
       const uploadPromises = files.map(async (file, index) => {
         const formData = new FormData();
-        
+
         // Add the file
         formData.append("image", file);
-        
+
         // Add a title based on the filename
         const title = file.name.split('.')[0];
         formData.append("title", title);
-        
+
         // Add shared metadata
         formData.append("app", metadata.app);
         formData.append("genre", metadata.genre);
         formData.append("screenTask", metadata.screenTask);
         formData.append("uiElements", metadata.uiElements.join(","));
         formData.append("tags", metadata.tags.join(","));
-        
+
         // Upload the file
         const response = await fetch("/api/screenshots", {
           method: "POST",
           body: formData,
         });
-        
+
         if (!response.ok) {
           throw new Error(`Failed to upload ${file.name}`);
         }
-        
+
         return response.json();
       });
-      
+
       await Promise.all(uploadPromises);
-      
+
       // Clean up preview URLs
       previewUrls.forEach(url => URL.revokeObjectURL(url));
-      
+
       // Invalidate queries to refresh data
       await queryClient.invalidateQueries({
         queryKey: ["/api/screenshots/filter"],
@@ -115,12 +114,12 @@ export default function BulkUpload() {
       await queryClient.invalidateQueries({
         queryKey: ["/api/screenshots/search"],
       });
-      
+
       toast({
         title: "Success",
         description: `${files.length} screenshots uploaded successfully`,
       });
-      
+
       setLocation("/");
     } catch (error) {
       toast({
@@ -132,7 +131,7 @@ export default function BulkUpload() {
       setIsUploading(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen bg-background p-6">
       <Card className="max-w-4xl mx-auto">
@@ -154,7 +153,7 @@ export default function BulkUpload() {
               </Button>
             </div>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-6">
               <div className="space-y-2">
@@ -170,7 +169,7 @@ export default function BulkUpload() {
                   You can select multiple files at once, or add more files after your initial selection.
                 </p>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="app">App Name (applies to all screenshots)</Label>
                 <Input
@@ -180,7 +179,7 @@ export default function BulkUpload() {
                   placeholder="Enter application name"
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="genre">Genre (applies to all screenshots)</Label>
                 <Select
@@ -199,7 +198,7 @@ export default function BulkUpload() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="screenTask">Screen Task (applies to all screenshots)</Label>
                 <Select
@@ -220,7 +219,7 @@ export default function BulkUpload() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="uiElements">UI Elements (applies to all screenshots)</Label>
                 <Input
@@ -235,7 +234,7 @@ export default function BulkUpload() {
                   placeholder="Card, Button, Navigation, etc."
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="tags">Tags (applies to all screenshots)</Label>
                 <Input
@@ -251,7 +250,7 @@ export default function BulkUpload() {
                 />
               </div>
             </div>
-            
+
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">{files.length} Files Selected</h3>
               <div className="grid grid-cols-2 gap-4 max-h-[500px] overflow-y-auto p-2">

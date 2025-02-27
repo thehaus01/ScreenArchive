@@ -92,6 +92,8 @@ export async function registerRoutes(app: Express) {
   // Create screenshot with file upload and AI tagging
   app.post("/api/screenshots", upload.single('image'), async (req, res) => {
     try {
+      console.log("Received upload request:", req.body);
+      
       if (!req.file) {
         return res.status(400).json({ message: "No image file uploaded" });
       }
@@ -109,7 +111,11 @@ export async function registerRoutes(app: Express) {
 
       const parseResult = insertScreenshotSchema.safeParse(screenshotData);
       if (!parseResult.success) {
-        return res.status(400).json({ message: "Invalid screenshot data" });
+        console.error("Invalid screenshot data:", parseResult.error.errors);
+        return res.status(400).json({ 
+          message: "Invalid screenshot data", 
+          errors: parseResult.error.errors 
+        });
       }
 
       const screenshot = await dbStorage.createScreenshot({
@@ -119,11 +125,15 @@ export async function registerRoutes(app: Express) {
 
       res.status(201).json(screenshot);
     } catch (error) {
+      console.error("Upload error:", error);
       if (req.file) {
         // Clean up uploaded file if something went wrong
         fs.unlinkSync(req.file.path);
       }
-      res.status(500).json({ message: "Failed to create screenshot" });
+      res.status(500).json({ 
+        message: "Failed to create screenshot", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
   });
 
