@@ -8,6 +8,9 @@ import { useState, useEffect } from 'react';
 import { Checkbox } from "@/components/ui/checkbox";
 
 
+import { useQuery } from "@tanstack/react-query";
+import { Screenshot } from "@shared/schema";
+
 interface FilterSidebarProps {
   filters: {
     app?: string;
@@ -26,24 +29,31 @@ export default function FilterSidebar({
   const [appOptions, setAppOptions] = useState<string[]>([]);
   const [tagOptions, setTagOptions] = useState<string[]>([]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/screenshots");
-        if (!response.ok) {
-          throw new Error("Failed to fetch screenshots");
-        }
-        const data = await response.json();
-        const uniqueApps = Array.from(new Set(data.map((s: any) => s.app)));
-        const uniqueTags = Array.from(new Set(data.flatMap((s: any) => s.tags || []))); // Assuming s.tags is an array
-        setAppOptions(uniqueApps);
-        setTagOptions(uniqueTags);
-      } catch (error) {
-        console.error("Error fetching data:", error);
+  const { data: screenshots } = useQuery<Screenshot[]>({
+    queryKey: ["/api/screenshots"],
+    queryFn: async () => {
+      const response = await fetch("/api/screenshots");
+      if (!response.ok) {
+        throw new Error("Failed to fetch screenshots");
       }
-    };
-    fetchData();
-  }, []);
+      return response.json();
+    },
+  });
+
+  useEffect(() => {
+    if (screenshots) {
+      const uniqueApps = Array.from(new Set(screenshots.map((s) => s.app)));
+      const uniqueTags = Array.from(new Set(screenshots.flatMap((s) => s.tags || [])));
+      
+      setAppOptions(uniqueApps);
+      setTagOptions(uniqueTags);
+      
+      // If the current app filter is no longer in the list of apps, clear it
+      if (filters.app && !uniqueApps.includes(filters.app)) {
+        onFiltersChange({ ...filters, app: undefined });
+      }
+    }
+  }, [screenshots, filters, onFiltersChange]);
 
   return (
     <div className="w-64 border-r bg-card p-6 hidden md:block">
