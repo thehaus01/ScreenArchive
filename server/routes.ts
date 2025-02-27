@@ -132,7 +132,7 @@ export async function registerRoutes(app: Express) {
     try {
       const id = parseInt(req.params.id);
       const screenshot = await dbStorage.getScreenshot(id);
-      
+
       if (!screenshot) {
         return res.status(404).json({ message: "Screenshot not found" });
       }

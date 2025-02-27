@@ -65,12 +65,12 @@ app.use((req, res, next) => {
   }
 
   const ports = [5000, 5001, 5002, 5003];
-  
+
   const tryListen = (portIndex = 0) => {
     if (portIndex >= ports.length) {
       throw new Error('No available ports found');
     }
-    
+
     const port = ports[portIndex];
     server.listen({
       port,

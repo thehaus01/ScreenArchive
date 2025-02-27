@@ -7,7 +7,6 @@ import { Pencil, Trash2 } from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { placeholderDashboard, placeholderFeed } from "@/lib/placeholders";
-import { useAuth } from "@/hooks/use-auth"; // Added import for useAuth
 
 interface ScreenshotCardProps {
   screenshot: Screenshot;
@@ -22,8 +21,7 @@ export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
   };
 
   const [, setLocation] = useLocation();
-  const { user } = useAuth();
-
+  
   const queryClient = useQueryClient();
   const deleteScreenshot = useMutation({
     mutationFn: async (id: string) => {
@@ -39,19 +37,25 @@ export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
     },
   });
 
-  const handleDelete = async () => {
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     if (window.confirm("Are you sure you want to delete this screenshot?")) {
-      await deleteScreenshot.mutateAsync(screenshot.id);
+      await deleteScreenshot.mutateAsync(screenshot.id.toString());
     }
   };
 
-  // Admin controls are now shown to everyone since authentication is disabled
-  const adminControls = (
-    <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+  const handleEdit = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setLocation(`/edit/${screenshot.id}`);
+  };
+  
+  // Controls shown to all users
+  const controls = (
+    <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
       <Button
         variant="secondary"
         size="icon"
-        onClick={() => setLocation(`/edit/${screenshot.id}`)}
+        onClick={handleEdit}
       >
         <Pencil className="h-4 w-4" />
       </Button>
@@ -64,8 +68,7 @@ export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
   return (
     <Card className="overflow-hidden transition-all hover:shadow-lg group">
       <div className="relative">
-        {adminControls}
-        {/*Added adminControls here based on the context of the original code*/}
+        {controls}
       </div>
       <div className="aspect-video relative">
         <img
