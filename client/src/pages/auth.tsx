@@ -49,10 +49,8 @@ export default function Auth() {
     }
   }
 
-  // Don't render the form if user is already authenticated
-  if (user) {
-    return <div className="min-h-screen bg-background p-6">Redirecting...</div>;
-  }
+  // We shouldn't render this "Redirecting..." message as it can cause a loop
+  // Let the useEffect handle the redirect instead
 
   return (
     <div className="min-h-screen bg-background p-6">
