@@ -1,14 +1,23 @@
 import OpenAI from "openai";
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error("Missing OPENAI_API_KEY environment variable");
+const apiKey = process.env.OPENAI_API_KEY;
+let openai: OpenAI | null = null;
+
+if (apiKey) {
+  openai = new OpenAI({
+    apiKey: apiKey,
+  });
+} else {
+  console.warn("No OPENAI_API_KEY found. AI tagging functionality will be disabled.");
 }
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function generateImageTags(imageDescription: string): Promise<string[]> {
+  // If OpenAI client isn't available, return empty tags array
+  if (!openai) {
+    console.log("OpenAI client not available. Skipping AI tag generation.");
+    return [];
+  }
+  
   try {
     const completion = await openai.chat.completions.create({
       model: "gpt-4",

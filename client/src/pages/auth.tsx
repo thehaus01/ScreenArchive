@@ -16,23 +16,24 @@ import { Card, CardContent } from "@/components/ui/card";
 import { insertUserSchema } from "@shared/schema";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function Auth() {
   const { user, loginMutation } = useAuth();
   const [, setLocation] = useLocation();
+  const redirectAttempted = useRef(false);
 
   useEffect(() => {
-    // Redirect if already logged in
-    if (user) {
-      // Use setTimeout to avoid state update during render
-      setTimeout(() => setLocation("/"), 0);
+    // Redirect if already logged in, but only once
+    if (user && !redirectAttempted.current) {
+      redirectAttempted.current = true;
+      setLocation("/");
     }
   }, [user, setLocation]);
 
   const form = useForm({
     resolver: zodResolver(
-      insertUserSchema.pick({ username: true, password: true })
+      insertUserSchema.pick({ username: true, password: true }),
     ),
     defaultValues: {
       username: "",
@@ -41,12 +42,16 @@ export default function Auth() {
   });
 
   async function onSubmit(data: { username: string; password: string }) {
-    await loginMutation.mutateAsync(data);
+    try {
+      await loginMutation.mutateAsync(data);
+    } catch (error) {
+      console.error("Login error:", error);
+    }
   }
 
-  // Don't render anything while checking auth status
+  // Don't render the form if user is already authenticated
   if (user) {
-    return null;
+    return <div className="min-h-screen bg-background p-6">Redirecting...</div>;
   }
 
   return (
