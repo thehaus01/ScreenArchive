@@ -25,7 +25,7 @@ export default function Auth() {
 
   useEffect(() => {
     // Redirect if already logged in, but only once
-    if (user && !redirectAttempted.current) {
+    if (user?.isAdmin && !redirectAttempted.current) {
       redirectAttempted.current = true;
       setLocation("/");
     }
