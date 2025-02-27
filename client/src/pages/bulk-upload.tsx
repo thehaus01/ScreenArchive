@@ -222,17 +222,22 @@ export default function BulkUpload() {
 
               <div className="space-y-2">
                 <Label htmlFor="uiElements">UI Elements (applies to all screenshots)</Label>
-                <Input
-                  id="uiElements"
-                  value={metadata.uiElements.join(", ")}
-                  onChange={(e) =>
-                    setMetadata({
-                      ...metadata,
-                      uiElements: e.target.value.split(",").map((el) => el.trim()).filter(Boolean),
-                    })
-                  }
-                  placeholder="Card, Button, Navigation, etc."
-                />
+                <Select
+                  value={metadata.uiElements}
+                  onValueChange={(value) => setMetadata({ ...metadata, uiElements: value })}
+                  multiple
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select UI elements" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {UI_ELEMENTS.map((element) => (
+                      <SelectItem key={element} value={element}>
+                        {element}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="space-y-2">
