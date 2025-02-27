@@ -14,6 +14,9 @@ app.use(express.urlencoded({ extended: false }));
 // Serve uploaded files statically
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Log that authentication is disabled
+log("Authentication is disabled - all users can add and remove screenshots");
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;

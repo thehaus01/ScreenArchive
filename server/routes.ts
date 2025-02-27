@@ -7,7 +7,6 @@ import multer from "multer";
 import path from "path";
 import { fileURLToPath } from "url";
 import fs from "fs";
-import { setupAuth } from "./auth";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,10 +44,6 @@ const upload = multer({
 });
 
 export async function registerRoutes(app: Express) {
-  // Setup authentication and get the admin middleware
-  const auth = await setupAuth(app);
-  const { requireAdmin } = auth;
-
   // Search screenshots
   app.get("/api/screenshots/search", async (req, res) => {
     const { q } = req.query;
@@ -95,7 +90,7 @@ export async function registerRoutes(app: Express) {
   });
 
   // Create screenshot with file upload and AI tagging
-  app.post("/api/screenshots", requireAdmin, upload.single('image'), async (req, res) => {
+  app.post("/api/screenshots", upload.single('image'), async (req, res) => {
     try {
       if (!req.file) {
         return res.status(400).json({ message: "No image file uploaded" });
@@ -132,8 +127,8 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  // Update screenshot (admin only)
-  app.patch("/api/screenshots/:id", requireAdmin, upload.single('image'), async (req, res) => {
+  // Update screenshot
+  app.patch("/api/screenshots/:id", upload.single('image'), async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const screenshot = await dbStorage.getScreenshot(id);
@@ -167,8 +162,8 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  // Delete screenshot (admin only)
-  app.delete("/api/screenshots/:id", requireAdmin, async (req, res) => {
+  // Delete screenshot
+  app.delete("/api/screenshots/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       const screenshot = await dbStorage.getScreenshot(id);
