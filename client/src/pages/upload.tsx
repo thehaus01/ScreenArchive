@@ -28,6 +28,8 @@ import {
   SCREEN_TASKS,
   UI_ELEMENTS,
 } from "@shared/schema";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
 export default function Upload() {
@@ -265,6 +267,39 @@ export default function Upload() {
                         ))}
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="uiElements"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>UI Elements</FormLabel>
+                    <div className="flex flex-wrap gap-2 mt-1">
+                      {UI_ELEMENTS.map((element) => {
+                        const isSelected = field.value.includes(element);
+                        return (
+                          <Badge
+                            key={element}
+                            variant={isSelected ? "default" : "outline"}
+                            className="cursor-pointer"
+                            onClick={() => {
+                              field.onChange(
+                                isSelected
+                                  ? field.value.filter((e) => e !== element)
+                                  : [...field.value, element]
+                              );
+                            }}
+                          >
+                            {element}
+                            {isSelected && <X className="ml-1 h-3 w-3" />}
+                          </Badge>
+                        );
+                      })}
+                    </div>
                     <FormMessage />
                   </FormItem>
                 )}
