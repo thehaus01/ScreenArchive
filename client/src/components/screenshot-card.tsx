@@ -24,22 +24,48 @@ export default function ScreenshotCard({ screenshot }: ScreenshotCardProps) {
   const [, setLocation] = useLocation();
   const { user } = useAuth();
 
+  const queryClient = useQueryClient();
+  const deleteScreenshot = useMutation({
+    mutationFn: async (id: string) => {
+      const res = await fetch(`/api/screenshots/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        throw new Error("Failed to delete screenshot");
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries(["screenshots"]);
+    },
+  });
+
+  const handleDelete = async () => {
+    if (window.confirm("Are you sure you want to delete this screenshot?")) {
+      await deleteScreenshot.mutateAsync(screenshot.id);
+    }
+  };
+
+  // Admin controls are now shown to everyone since authentication is disabled
+  const adminControls = (
+    <div className="absolute top-2 right-2 flex space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+      <Button
+        variant="secondary"
+        size="icon"
+        onClick={() => setLocation(`/edit/${screenshot.id}`)}
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <Button variant="destructive" size="icon" onClick={handleDelete}>
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+
   return (
-    <Card className="overflow-hidden transition-all hover:shadow-lg">
+    <Card className="overflow-hidden transition-all hover:shadow-lg group">
       <div className="relative">
-        {user?.isAdmin && (
-          <Button
-            variant="outline"
-            size="icon"
-            className="absolute top-2 right-2 z-10"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLocation(`/edit/${screenshot.id}`);
-            }}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-        )}
+        {adminControls}
+        {/*Added adminControls here based on the context of the original code*/}
       </div>
       <div className="aspect-video relative">
         <img
