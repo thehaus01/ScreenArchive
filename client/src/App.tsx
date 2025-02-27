@@ -39,14 +39,27 @@ function Navigation() {
   console.log("Current location:", location);
   
   // Save a reference to prevent repeated redirects
-  const redirectAttempted = useRef(false);
-  
+  // Use sessionStorage to track redirects across component reloads
   useEffect(() => {
-    // Only attempt to redirect once per component mount
-    if (!user && location !== "/auth" && !redirectAttempted.current) {
-      redirectAttempted.current = true;
-      console.log("Redirecting to /auth");
-      setLocation("/auth");
+    // Only redirect to auth if not authenticated and not already on auth page
+    if (!user && location !== "/auth") {
+      const redirectCount = parseInt(sessionStorage.getItem('redirectCount') || '0');
+      
+      // Only redirect if we haven't redirected too many times already (prevent loops)
+      if (redirectCount < 2) {
+        console.log(`Redirecting to /auth (attempt ${redirectCount + 1})`);
+        sessionStorage.setItem('redirectCount', (redirectCount + 1).toString());
+        setLocation("/auth");
+      } else {
+        console.log("Too many redirects, stopping redirect cycle");
+        // Reset after 5 seconds to allow future redirects
+        setTimeout(() => {
+          sessionStorage.setItem('redirectCount', '0');
+        }, 5000);
+      }
+    } else if (user) {
+      // Reset redirect count when user is authenticated
+      sessionStorage.setItem('redirectCount', '0');
     }
   }, [user, location, setLocation]);
 

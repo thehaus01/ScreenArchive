@@ -24,10 +24,14 @@ export default function Auth() {
   const redirectAttempted = useRef(false);
 
   useEffect(() => {
-    // Redirect if already logged in, but only once
-    if (user?.isAdmin && !redirectAttempted.current) {
-      redirectAttempted.current = true;
-      setLocation("/");
+    // Only redirect if user is fully loaded and is admin
+    if (user?.isAdmin) {
+      console.log("User is admin, redirecting to home");
+      // Use setTimeout to ensure this doesn't conflict with other redirects
+      setTimeout(() => setLocation("/"), 100);
+      
+      // Reset the redirect count in sessionStorage
+      sessionStorage.setItem('redirectCount', '0');
     }
   }, [user, setLocation]);
 
