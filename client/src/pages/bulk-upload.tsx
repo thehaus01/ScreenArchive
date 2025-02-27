@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select";
 import { GENRES, SCREEN_TASKS, UI_ELEMENTS } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
+import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
 
 export default function BulkUpload() {
@@ -222,22 +223,29 @@ export default function BulkUpload() {
 
               <div className="space-y-2">
                 <Label htmlFor="uiElements">UI Elements (applies to all screenshots)</Label>
-                <Select
-                  value={metadata.uiElements}
-                  onValueChange={(value) => setMetadata({ ...metadata, uiElements: value })}
-                  multiple
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select UI elements" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {UI_ELEMENTS.map((element) => (
-                      <SelectItem key={element} value={element}>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  {UI_ELEMENTS.map((element) => {
+                    const isSelected = metadata.uiElements.includes(element);
+                    return (
+                      <Badge
+                        key={element}
+                        variant={isSelected ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => {
+                          setMetadata({
+                            ...metadata,
+                            uiElements: isSelected
+                              ? metadata.uiElements.filter((e) => e !== element)
+                              : [...metadata.uiElements, element],
+                          });
+                        }}
+                      >
                         {element}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                        {isSelected && <X className="ml-1 h-3 w-3" />}
+                      </Badge>
+                    );
+                  })}
+                </div>
               </div>
 
               <div className="space-y-2">
