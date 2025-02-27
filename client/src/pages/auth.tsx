@@ -36,21 +36,24 @@ export default function Auth() {
       insertUserSchema.pick({ username: true, password: true }),
     ),
     defaultValues: {
-      username: "",
-      password: "",
+      username: "admin",
+      password: "admin",
     },
   });
 
   async function onSubmit(data: { username: string; password: string }) {
+    console.log("Submitting login form with:", data);
     try {
       await loginMutation.mutateAsync(data);
+      // After successful login, redirect to homepage
+      if (!redirectAttempted.current) {
+        redirectAttempted.current = true;
+        setLocation("/");
+      }
     } catch (error) {
       console.error("Login error:", error);
     }
   }
-
-  // We shouldn't render this "Redirecting..." message as it can cause a loop
-  // Let the useEffect handle the redirect instead
 
   return (
     <div className="min-h-screen bg-background p-6">
